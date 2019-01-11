@@ -1,40 +1,45 @@
 /* tslint:disable:no-unused-variable */
-import PeekFileDefinitionProvider from './lens';
 import apexTest from './apexTest';
+import apexTestResults from '../services/apexTestResults';
+import codeCompletionRefresh from './codeCompletionRefresh'
 import compile from './compile';
 import createClass from './createClass';
-import credentials from './credentials';
 import deploy from './deploy';
 import diff from './diff';
-import documentMethod from './documentMethod';
+import dx from './dx';
 import executeAnonymous from './executeAnonymous';
-import generator from './package';
+import find from './find';
 import getLog from './getLog';
-import open from './open';
+import { open, showFileOptions } from './open';
+import getOverallCoverage from './overallCoverage';
+import packageBuilder from './packageBuilder';
+import queryEditor from './queryEditor';
 import retrieve from './retrieve';
 import showMenu from './menu';
-import soql from './soql';
 import staticResource from './staticResource';
-import toql from './toql';
 import {staticResourceDeployFromFile} from './staticResource';
+import settings from './settings';
 
 export {
-    PeekFileDefinitionProvider,
     apexTest,
+    apexTestResults,
+    codeCompletionRefresh,
     compile,
     createClass,
-    credentials,
     deploy,
     diff,
-    documentMethod,
+    dx,
     executeAnonymous,
-    generator,
+    find,
     getLog,
     open,
+    getOverallCoverage,
+    packageBuilder,
+    queryEditor,
     retrieve,
+    settings,
+    showFileOptions,
     showMenu,
-    soql,
     staticResource,
     staticResourceDeployFromFile,
-    toql,
 };

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import jsforce = require('jsforce');
+import { Connection } from 'jsforce';
 
 declare module 'vscode' {
     export namespace window {
@@ -7,29 +7,74 @@ declare module 'vscode' {
     }
 }
 
+export interface FCWorkspaceMembers {
+    [key: string]: IWorkspaceMember;
+}
+
+export interface FCOrg {
+    username: string;
+    url: string;
+    src?: string;
+}
+
 export interface Config {
     apiVersion?: string;
     autoCompile?: boolean;
     autoRefresh?: boolean;
     browser?: string;
-    debugOnly?: boolean;
+    checkForFileChanges?: boolean;
     debugFilter?: string;
+    debugOnly?: boolean;
     deployOptions?: {
-        verbose?: boolean,
-        checkOnly?: boolean
+        allowMissingFiles?: boolean,
+        checkOnly?: boolean,
+        ignoreWarnings?: boolean,
+        rollbackOnError?: boolean,
+        runTests?: string[],
+        singlePackage?: boolean,
+        testLevel?: string,       
     };
-    password?: string;
+    maxFileChangeNotifications?: number;
+    maxQueryHistory?: number;
+    maxQueryResultsPerPage?: number;
+    outputQueriesAsCSV?: boolean;
+    overwritePackageXML?: boolean;
     poll?: number;
     pollTimeout?: number;
     prefix?: string;
-    proxyUrl?: string;
+    revealTestedClass?: boolean;
+    showFilesOnOpen?: boolean;
+    showFilesOnOpenMax?: number;
     showTestCoverage? : boolean;
     showTestLog? : boolean;
     spaDist? : string;
+    staticResourceCacheControl?: string;
     src?: string;
     url?: string;
-    username?: string;
-    // workspaceRoot?: string;
+    username?: string;    
+}
+
+export interface MetadataResult {
+    ApiVersion: number;
+    attributes: { type: string };
+    Body: string;
+    BodyCrc: number;
+    CreatedById: string;
+    CreatedDate: string;
+    FullName: string;
+    Id: string;
+    IsValid: boolean;
+    LastModifiedById: string;
+    LastModifiedDate: string;
+    LastModifiedByName: string;
+    LengthWithoutComments: number;
+    ManageableState: string;
+    Metadata: {};
+    Name: string;
+    NamespacePrefix: string;
+    Status: string;
+    SymbolTable: {};
+    SystemModstamp: string;
 }
 
 interface ILocationsNotCovered {
@@ -42,27 +87,39 @@ interface ILocationsNotCovered {
 interface IWorkspaceMember {
     name: string;
     path: string;
-    memberInfo: jsforce.IMetadataFileProperties;
-}
-
-export interface IWorkspaceService {
-    getWorkspaceMembers: () => Promise<IWorkspaceMember[]>;
+    id: string;
+    lastModifiedDate: string;
+    lastModifiedByName: string;
+    lastModifiedById: string;
+    type: string;
+    saveTime: boolean;
+    coverage?: ICodeCoverage;
 }
 
 interface ICodeCoverage {
-    dmlInfo: any[];
-    id: string;
-    locationsNotCovered: ILocationsNotCovered[];
-    methodInfo: any[];
-    name: string;
-    namespace: string;
-    numLocations: Number;
-    numLocationsNotCovered: Number;
-    soqlInfo: any[];
-    soslInfo: any[];
-    type: string;
+    attributes: 
+		{
+			type: string,
+			url: string,
+		},
+		ApexClassOrTriggerId: string,
+		ApexClassOrTrigger: 
+		{
+			attributes: 
+			{
+				type: string,
+				url: string,
+			},
+			Name: string,
+		},
+		NumLinesCovered: number,
+		NumLinesUncovered: number,
+		Coverage: 
+		{
+            coveredLines: number[],
+            uncoveredLines: number[]
+        }
 }
-
 interface ICodeCoverageWarning {
     id: string;
     message: string;
@@ -81,7 +138,7 @@ interface IContainerMember {
     id: string;
 }
 
-interface IMetadataObject {
+export interface IMetadataObject {
     directoryName: string;
     inFolder: boolean;
     metaFile: boolean;
@@ -90,39 +147,37 @@ interface IMetadataObject {
     childXmlNames?: string[];
 }
 
-// interface IMetadataDescribe {
-//     metadataObjects: IMetadataObject[];
-//     organizationNamespace: string;
-//     partialSaveAllowed: boolean;
-//     testRequired: boolean;
-// }
+export interface IMetadataDescribe {
+    metadataObjects: IMetadataObject[];
+    organizationNamespace: string;
+    partialSaveAllowed: boolean;
+    testRequired: boolean;
+}
 
 export interface IForceService {
-    operatingSystem?: string;
     config?: Config;
+    projectRoot: string;
     workspaceRoot: string;
-    completions?: vscode.CompletionItem[];
-    metadata: jsforce.IMetadataFileProperties[];
+    storageRoot: string;
+    describe: IMetadataDescribe;
     declarations?: IDeclarations;
-    codeCoverage?: {};
-    codeCoverageWarnings?: ICodeCoverageWarning[];
-    // symbolTable?: any;
     containerId?: string;
-    queueCompile?: boolean;
-    isCompiling?: boolean;
-    workspaceMembers: IWorkspaceMember[];
+    statusTimeout: any;    
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
-    conn?: jsforce.Connection;
-    userInfo?: jsforce.UserInfo;
-    username?: string;
+    conn?: Connection;
     outputChannel: vscode.OutputChannel;
     statusBarItem: vscode.StatusBarItem;
-    connect(context: vscode.ExtensionContext): Promise<IForceService>;
+    fcDiagnosticCollection: vscode.DiagnosticCollection;
+    uuid: string;
+    connect(): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
+    showStatus(message: string): void;
     clearLog(): void;
-    refreshApexMetadata(): Promise<any>;
+    resetStatus(): void;
+    checkForFileChanges(): any;
 }
+
 
 export interface ForceCodeError {
     message: string;
